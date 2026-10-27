@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f72">
+<title>Thulirvi Technologies LMS</title><link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="#"><span class="logo">T</span><span><b>THULIRVI</b><small>TECHNOLOGIES · LEARN</small></span></a><div class="topright"><span id="userEmail" class="muted"></span><button id="logoutBtn" class="btn light" hidden>Log out</button></div></header>
+<main>
+<section class="hero"><p class="eyebrow">LEARN · BUILD · GROW</p><h1>Build skills.<br><span>Unlock your potential.</span></h1><p>One learning space for your courses, daily tasks, assignments and progress.</p></section>
+<div id="configWarning" class="notice"><b>Setup required:</b> Add your Supabase Project URL and publishable/anon key in <code>config.js</code>, then run <code>schema.sql</code> in Supabase SQL Editor.</div>
+<section id="authView" class="panel auth">
+<h2>Welcome to your learning portal</h2><p class="muted">Sign in or create a student account.</p>
+<form id="authForm" class="form">
+<label>Email<input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+<label>Password<input id="password" type="password" required minlength="8" autocomplete="current-password" placeholder="At least 8 characters"></label>
+<div class="actions"><button class="btn" type="submit">Sign in</button><button class="btn light" type="button" id="signupBtn">Create account</button><button class="textbtn" type="button" id="resetBtn">Forgot password?</button></div><p id="authMsg" class="message"></p>
+</form></section>
+<section id="appView" hidden>
+<div class="sectionTitle"><div><p class="eyebrow">YOUR LEARNING SPACE</p><h2 id="hello">Dashboard</h2></div><span id="roleBadge" class="badge">STUDENT</span></div>
+<div id="globalMsg" class="message"></div>
+<div class="stats">
+<div class="stat"><small>My courses</small><b id="statCourses">0</b></div><div class="stat"><small>Lessons completed</small><b id="statDone">0</b></div><div class="stat"><small>Pending tasks</small><b id="statTasks">0</b></div>
+</div>
+<section class="panel"><div class="sectionTitle"><h2>Explore courses</h2></div><div id="catalog" class="grid"></div></section>
+<section class="panel"><div class="sectionTitle"><h2>My courses & daily lessons</h2></div><div id="myCourses"></div></section>
+<section class="panel"><h2>Submit course payment</h2><p class="muted">Pay using the official UPI details provided by Thulirvi Technologies. Submit the transaction reference below. Admin will verify the actual credit before enabling access.</p><div class="notice compact">Do not enter your UPI PIN, bank password or OTP here. This form only accepts a transaction reference.</div>
+<form id="paymentForm" class="form"><label>Course<select id="payCourse" required></select></label><label>Amount paid (₹)<input id="payAmount" type="number" min="0" step="1" required></label><label>UPI transaction reference / UTR<input id="payRef" required minlength="4" maxlength="100" placeholder="Transaction reference"></label><button class="btn">Submit for verification</button><p id="payMsg" class="message"></p></form></section>
+<section class="panel"><h2>My assignments</h2><div id="myAssignments"></div></section>
+<section class="panel"><h2>My quizzes</h2><div id="myQuizzes"></div></section>
+<section id="adminView" class="panel" hidden><div class="sectionTitle"><h2>Admin console</h2><span class="badge admin">ADMIN ONLY</span></div>
+<div class="tabs"><button class="tab active" data-tab="paymentsTab">Payments</button><button class="tab" data-tab="coursesTab">Courses & lessons</button><button class="tab" data-tab="assignTab">Assignments</button><button class="tab" data-tab="quizTab">Quizzes</button><button class="tab" data-tab="studentsTab">Students</button></div>
+<div id="paymentsTab" class="tabbody"><h3>Pending payment requests</h3><div id="pendingPayments"></div></div>
+<div id="coursesTab" class="tabbody" hidden><div class="adminGrid"><div><h3>Create course</h3><form id="courseForm" class="form"><label>Title<input id="courseTitle" required maxlength="120"></label><label>Description<textarea id="courseDesc" required maxlength="1000"></textarea></label><label>Fee in INR<input id="coursePrice" type="number" min="0" required></label><label>Duration (days)<input id="courseDuration" type="number" min="1" max="365" value="30" required></label><button class="btn">Create course</button><p id="courseMsg" class="message"></p></form></div><div><h3>Publish daily lesson</h3><form id="lessonForm" class="form"><label>Course<select id="lessonCourse" required></select></label><label>Day number<input id="lessonDay" type="number" min="1" max="365" required></label><label>Lesson title<input id="lessonTitle" required maxlength="160"></label><label>Lesson content<textarea id="lessonContent" rows="4" required></textarea></label><label>Resource URL (optional)<input id="lessonUrl" type="url" placeholder="https://..."></label><label>Daily task<textarea id="lessonTask" rows="3"></textarea></label><button class="btn">Publish lesson</button><p id="lessonMsg" class="message"></p></form></div></div><h3>Course catalogue management</h3><div id="adminCourses"></div></div>
+<div id="assignTab" class="tabbody" hidden><div class="adminGrid"><div><h3>Create assignment</h3><form id="assignmentForm" class="form"><label>Course<select id="assignmentCourse" required></select></label><label>Title<input id="assignmentTitle" required maxlength="160"></label><label>Instructions<textarea id="assignmentInstructions" required rows="4"></textarea></label><label>Due date (optional)<input id="assignmentDue" type="date"></label><button class="btn">Publish assignment</button><p id="assignmentMsg" class="message"></p></form></div><div><h3>Review submissions</h3><div id="submissions"></div></div></div></div>
+<div id="quizTab" class="tabbody" hidden><div class="adminGrid"><div><h3>Create quiz question</h3><form id="quizForm" class="form"><label>Course<select id="quizCourse" required></select></label><label>Question<textarea id="quizQuestion" required></textarea></label><label>Option A<input id="optA" required></label><label>Option B<input id="optB" required></label><label>Option C<input id="optC" required></label><label>Option D<input id="optD" required></label><label>Correct option<select id="correctOpt"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></label><button class="btn">Add quiz question</button><p id="quizAdminMsg" class="message"></p></form></div><div><h3>Quiz question bank</h3><div id="quizBank"></div></div></div></div>
+<div id="studentsTab" class="tabbody" hidden><h3>Student profiles & enrollments</h3><div id="studentsList"></div></div>
+</section>
+</section>
+</main>
+<footer>© Thulirvi Technologies · Secure learning for every learner.</footer>
+<script src="config.js"></script><script src="app.js"></script>
+</body></html>
