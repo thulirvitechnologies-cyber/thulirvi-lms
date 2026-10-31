@@ -1,45 +1,24 @@
-# Thulirvi Technologies LMS — full starter implementation
+# Thulirvi Technologies LMS – Rebuilt Frontend
 
-Mobile-first custom-coded LMS for Android-phone-based development. Includes student login, admin role, multiple courses, manual UPI payment claims, database-verified fee checks, admin approval, per-course enrollment, daily lesson unlocks, lesson completion, assignment submissions/reviews, quizzes, student list, progress dashboard, and password-reset flow.
+## Included
+- Public Explore Courses catalogue removed. Course rows remain in Supabase and remain available in payment/admin selectors.
+- Student dashboard continues to show only the signed-in student's enrollments.
+- Lesson display supports explanation, examples and expected output sections.
+- Admin lesson form now collects explanation, examples, expected output, resource URL and a required unique daily task. These are stored in the existing `lessons.content` and `lessons.task_instructions` columns; no schema migration is required for these fields.
+- Fixed message helper to accept either an element ID or an element node.
+- Existing auth, payment review, assignment, quiz and RLS/RPC flows retained.
 
-## Included files
-- `index.html` — portal layout
-- `style.css` — responsive teal/white branding
-- `config.js` — public Supabase URL/key placeholders and optional display config
-- `app.js` — student and admin application logic
-- `schema.sql` — database tables, RLS policies, and protected database functions
+## Deploy
+1. Download and extract this ZIP.
+2. Upload/replace `index.html`, `style.css`, `app.js`, `config.js` in the existing GitHub repository.
+3. Commit changes and wait for GitHub Pages deployment.
+4. Open the site in a private/incognito tab or hard refresh.
 
-## Deploy from Android
-1. Create a Supabase project at https://supabase.com.
-2. Open SQL Editor, paste all of `schema.sql`, and run it on a new project. Fix any SQL errors before continuing.
-3. In Supabase Authentication settings, configure your Site URL and Redirect URLs for the deployed site. Enable email confirmation if desired.
-4. Sign up through the website after setting `config.js`.
-5. In Authentication > Users, copy your account UUID. In SQL Editor run: `update public.profiles set role='admin' where id='YOUR_AUTH_USER_UUID';`
-6. Put your Supabase Project URL and publishable/anon key into `config.js`. Never use the service_role key in frontend files.
-7. Upload all five files to a static host such as Cloudflare Pages using your Android browser. Configure the correct output/root directory and publish.
-8. Set the deployed URL in Supabase Auth URL configuration and test password reset.
-9. Log in as admin and create courses, lessons, assignments, and quiz questions.
-10. Test with a separate student account and a small test payment. Verify the transaction in your bank/UPI account before approving it.
+## Supabase safety
+- `config.js` contains only the public publishable key. Never put a `service_role` key in browser files.
+- Existing database and student/payment data are not changed by this frontend rebuild.
+- **Do not rerun `schema.sql` on an existing project**; its policy creation statements may conflict with existing policies.
+- The current schema does not include a certificate-issuance/verification table or project-completion review workflow. Those require a separate, additive SQL migration and server-side validation before certificates can be issued securely. No fake certificate QR or client-only certificate authority is included in this package.
 
-## Payment safety
-Students submit a course ID, amount, and UPI transaction reference through `submit_payment_claim`. The database checks the actual course fee and rejects reused transaction references. A claim remains pending until an admin checks the actual credit and approves it. Approval runs through `admin_review_payment`, which checks admin role and creates the enrollment. Do not treat screenshots as proof of settlement; check the bank/UPI transaction record.
-
-## Lesson unlock
-Day 1 is available immediately after enrollment approval. Day 2 opens after 24 hours, Day 3 after 48 hours, etc. This is elapsed-time unlocking. The database policy enforces the same restriction, not only the frontend.
-
-## Security notes
-- RLS is enabled on every app table.
-- Role assignment is not accepted from user signup metadata.
-- Payment status and enrollment cannot be directly changed by students.
-- Quiz answer checking runs in a database function; correct answers are not selected by the browser query.
-- Use only the public publishable/anon key in browser code; never publish service_role credentials.
-- Public lesson URLs are shareable. For paid PDFs/videos, implement private storage and short-lived signed URLs before selling access.
-- This starter is not a security audit. Test in a separate project before public launch.
-
-## Current scope and honest limitations
-- Assignment submissions accept text or a project URL; file upload is not implemented.
-- Quiz is a basic multiple-choice question bank, with score feedback.
-- Certificate PDF generation/email delivery is not implemented in this version.
-- Admin user list shows profile UUIDs, not email addresses, because profile rows do not store email. Use Supabase Auth admin tools to manage email/identity.
-- UPI ID is intentionally blank in `config.js`; add only the verified business payment details.
-- Free-tier limits, provider terms, and availability can change. ₹0 is the target for initial setup, not a guarantee of unlimited service.
+## Daily lesson authoring format
+In the admin panel, add one lesson per course/day. Write the topic explanation, worked examples, expected output, and a different practical task for each day. Use explicit headings in the saved lesson content automatically. Publish mini-project and major-project milestones as assignments and review submissions before marking them complete.
